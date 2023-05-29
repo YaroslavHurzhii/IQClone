@@ -23,7 +23,9 @@ function PopupLogin({ setConnection, setCurrentUser, setdisplaypopup, setChatDat
         
         connec.on("JoinR", (userdata) => {
             setCurrentUser(modalData.UserName);
-            setChatData(userdata[0]);
+            console.log(userdata);
+            console.log(JSON.parse(userdata));
+            setChatData(JSON.parse(userdata));
             setdisplaypopup(false);
         });
         connec.on("setupError", (er) => {

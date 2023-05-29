@@ -6,9 +6,9 @@ const App = () => {
     const [displaypopup, setdisplaypopup] = useState(true);
     const [ChatData, setChatData] = useState({
         id: "",
-        messages: [],
         password: "",
         title: "",
+        messages: [],
         users:[]
     });
     const [Currentuser, setCurrentUser] = useState("");
