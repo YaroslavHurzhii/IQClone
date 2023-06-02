@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using webapi.Utils;
 using webapi.DB;
 
 namespace webapi.hub
@@ -16,49 +17,7 @@ namespace webapi.hub
             _context = db;
         }
 
-        private object ConvertToJSON(object a)
-        {
-            if (a.GetType() == typeof(List<Room>))
-            {
-                var obj = ((List<Room>)a)[0];
-                var result = new JObject{
-                { "id", obj.Id},
-                { "title", obj.Title },
-                { "password", obj.Password },
-                { "users", UsersToJarray(obj.Users) },
-                { "messages", MessagesToJarray(obj.Messages) }
-                };
-
-                return result.ToString();
-            }
-            return null;
-        }
-
-        private JArray UsersToJarray(List<User> a)
-        {
-            var arr = new JArray();
-            foreach (User u in a)
-            {
-                var jObject = new JObject();
-                jObject["Id"] = u.Id;
-                jObject["Name"] = u.Name;
-                arr.Add(jObject);
-            }
-            return arr;
-        }
-        private JArray MessagesToJarray(List<Message> a)
-        {
-            var arr = new JArray();
-            foreach (Message m in a)
-            {
-                var jObject = new JObject();
-                jObject["Id"] = m.Id;
-                jObject["sender"] = m.Sender;
-                jObject["content"] = m.Content;
-                arr.Add(jObject);
-            }
-            return arr;
-        }
+        
         public async Task JoinRoom(Modaldata d)
         {
             if (await _context.Rooms.AllAsync(e => e.Title != d.RoomName))
@@ -71,9 +30,7 @@ namespace webapi.hub
                 Room? r = await _context.Rooms.FirstOrDefaultAsync(r => r.Title == d.RoomName && r.Password == d.Password);
                 await Groups.AddToGroupAsync(Context.ConnectionId, d.RoomName);
                 var info = _context.Rooms.Where(t => t.Title == d.RoomName).Include(r => r.Users).Include(r => r.Messages).ToList();
-                await Clients.Caller.SendAsync("JoinR", ConvertToJSON(info));
-                User? user = await _context.Users.FirstOrDefaultAsync(r => r.Name == d.UserName);
-                await Clients.Group(d.RoomName).SendAsync("NewUser", ConvertToJSON(user));
+                await Clients.Caller.SendAsync("JoinR", JSONConvertor.ConvertToJSON(info));
             }
         }
         public async Task CreateRoom(Modaldata d)
@@ -89,8 +46,8 @@ namespace webapi.hub
                 await _context.SaveChangesAsync();
                 AddUserToRoom(d.UserName, d.RoomName);
                 await Groups.AddToGroupAsync(Context.ConnectionId, d.RoomName);
-                var users = _context.Rooms.Where(r => r.Title == d.RoomName).Include(r => r.Users).Include(r => r.Messages).ToList();
-                await Clients.Group(d.RoomName).SendAsync("JoinR", users);
+                var info = _context.Rooms.Where(t => t.Title == d.RoomName).Include(r => r.Users).Include(r => r.Messages).ToList();
+                await Clients.Caller.SendAsync("JoinR", JSONConvertor.ConvertToJSON(info));
             }
         }
 
@@ -103,7 +60,7 @@ namespace webapi.hub
             r.Messages.Add(m);
             await _context.SaveChangesAsync();
             Message? mes = await _context.Messages.FirstOrDefaultAsync(m => m.Content == d.Message);
-            await Clients.Group(d.RoomName).SendAsync("ReciveMessage", ConvertToJSON(mes));
+            await Clients.Group(d.RoomName).SendAsync("ReciveMessage", JSONConvertor.ConvertToJSON(mes));
         }
 
         private async void AddUserToRoom(string username, string room)
@@ -114,16 +71,16 @@ namespace webapi.hub
             {
                 us = new User { Name = username };
                 await _context.Users.AddAsync(us);
-
-            }
-            if (us != null)
-            {
-                if (!r.Users.Contains(us))
+                try
                 {
                     r.Users.Add(us);
+                    await _context.SaveChangesAsync();
+                    await Clients.Group(r.Title).SendAsync("NewUser", JSONConvertor.ConvertToJSON(us));
                 }
-
-                await _context.SaveChangesAsync();
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
         }
         public record class Mesdata(string RoomName, string Message, string UserName);

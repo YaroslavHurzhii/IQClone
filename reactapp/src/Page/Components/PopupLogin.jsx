@@ -3,7 +3,7 @@ import "./PopupLogin.scss"
 import { HubConnectionBuilder } from "@microsoft/signalr"
 import Loading from './Loading';
 
-function PopupLogin({ setConnection, setCurrentUser, setdisplaypopup, setChatData }) {
+function PopupLogin({ setConnection, setCurrentUser, setdisplaypopup, setMessages, setUsers, setTitle, }) {
     const [modalData, setModalData] = useState({
         RoomName:"",Password:"",UserName:""
     })
@@ -22,10 +22,12 @@ function PopupLogin({ setConnection, setCurrentUser, setdisplaypopup, setChatDat
 
         
         connec.on("JoinR", (userdata) => {
+            const resp = JSON.parse(userdata);
             setCurrentUser(modalData.UserName);
-            console.log(userdata);
-            console.log(JSON.parse(userdata));
-            setChatData(JSON.parse(userdata));
+            setTitle(resp.title);
+            setMessages(resp.messages);
+            setUsers(resp.users);
+            console.log(resp);
             setdisplaypopup(false);
         });
         connec.on("setupError", (er) => {

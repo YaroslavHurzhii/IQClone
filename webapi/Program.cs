@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using webapi.DB;
 using webapi.hub;
+using webapi.Utils;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,7 +29,7 @@ app.MapGet("/rooms",async (ApplicationContext db) =>{
 });
 
 app.MapGet("/room/{roomID}", async (string roomID, ApplicationContext db) => {
-    return await db.Rooms.Where(r=>r.Title == roomID).Include(r => r.Users).Include(r => r.Messages).ToListAsync();
+    return JSONConvertor.ConvertToJSON( await db.Rooms.Where(r=>r.Title == roomID).Include(r => r.Users).Include(r => r.Messages).ToListAsync());
 });
 app.MapHub<ChatHub>("/chat");
 

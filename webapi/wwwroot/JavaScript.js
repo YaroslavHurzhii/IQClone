@@ -1,6 +1,6 @@
-﻿const Right = document.getElementById('Right');
-const Left = document.getElementById("Left");
-const Middle = document.getElementById("Middle");
+﻿const Right = document.getElementById('inRight');
+const Left = document.getElementById("inLeft");
+const Middle = document.getElementById("inMiddle");
 let messages = [];
 let users = [];
 let chats = [];
@@ -20,6 +20,7 @@ fetch('https://localhost:7098/rooms', {
             console.log(chats[i]);
             let div = document.createElement('div');
             div.id = chats[i].id;
+            div.className = "chatInList";
             div.textContent = chats[i].title;
             div.addEventListener("click", () => {
                 handleSubmit(div.textContent);
@@ -31,9 +32,12 @@ fetch('https://localhost:7098/rooms', {
         console.log(error.message);
     });
 
-
-
-
+function ConvertTme(a) {
+    const dateTime = new Date(a);
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+}
 
 const handleSubmit = (id) => {
     fetch('https://localhost:7098/room/'+id, {
@@ -43,16 +47,17 @@ const handleSubmit = (id) => {
         .then(response => response.json())
         .then((data) => {
             console.log(data);
-            messages = data[0].messages;
-            users = data[0].users;
+            messages = data.messages;
+            users = data.users;
             while (Left.firstChild) {
                 Left.removeChild(Left.firstChild);
             }
             console.log(messages);
             for (let i = 0; i < messages.length; i++) {
                 let div = document.createElement('div');
-                div.id = messages[i].id;
-                div.textContent = messages[i].sender + "(" + messages[i].timestamp + "): " + messages[i].content;
+                div.id = messages[i].Id;
+                div.className = "messageInList";
+                div.textContent = messages[i].sender + "(" + ConvertTme(messages[i].time) + "): " + messages[i].content;
                 Left.appendChild(div);
             }
             while(Middle.firstChild) {
@@ -60,8 +65,9 @@ const handleSubmit = (id) => {
             }
             for (let i = 0; i < users.length; i++) {
                 let div = document.createElement('div');
-                div.id = users[i].id;
-                div.textContent = users[i].name;
+                div.id = users[i].Id;
+                div.className = "userInList";
+                div.textContent = users[i].Name;
                 Middle.appendChild(div);
             }
         })

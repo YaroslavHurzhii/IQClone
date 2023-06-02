@@ -22,7 +22,7 @@
     "https": {
         "commandName": "Project",
         "dotnetRunMessages": true,
-        "launchBrowser": false,
+        "launchBrowser": true,
         "launchUrl": "server.html",
         "applicationUrl": "https://localhost:7098",
         "environmentVariables": {

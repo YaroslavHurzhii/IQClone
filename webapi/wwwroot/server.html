@@ -5,11 +5,61 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        #Middle, #Right {
+            width: 20%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 5px;
+            border: 1px solid;
+        }
+
+        #Left {
+            width: 60%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 5px;
+            border: 1px solid;
+        }
+
+        body {
+            display: flex;
+            height: 980px;
+            overflow: hidden;
+            padding: 5px;
+            border: 1px solid;
+        }
+
+        .chatInList {
+            padding: 2px;
+            border: 1px solid;
+            margin: 1px 0px;
+            display: flex;
+            justify-content: center;
+        }
+        .messageInList, .userInList{
+            word-wrap:break-word;
+        }
+        p {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+
 </head>
 <body>
-    <div id="Left"></div>
-    <div id="Middle"></div>
-    <div id="Right"></div>
+    <div id="Left">
+        <p>Messages</p>
+        <div id="inLeft"></div>
+    </div>
+    <div id="Middle">
+        <p>Users</p>
+        <div id="inMiddle"></div>
+    </div>
+    <div id="Right">
+        <p>Chats</p>
+        <div id="inRight"></div>
+    </div>
     <script src="JavaScript.js"></script>
 </body>
 </html>
